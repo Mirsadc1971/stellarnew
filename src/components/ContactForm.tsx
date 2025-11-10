@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Mail, Phone, User, Building, MessageSquare, Send } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface FormData {
   name: string;
@@ -34,53 +33,10 @@ export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus('idle');
-
-    try {
-      const { error } = await supabase
-        .from('contact_inquiries')
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone || null,
-          company: formData.company || null,
-          inquiry_type: formData.inquiry_type,
-          property_address: formData.property_address || null,
-          number_of_units: formData.number_of_units ? parseInt(formData.number_of_units) : null,
-          board_position: formData.board_position || null,
-          years_at_property: formData.years_at_property ? parseFloat(formData.years_at_property) : null,
-          previous_experience: formData.previous_experience || null,
-          message: formData.message,
-          status: 'new'
-        });
-
-      if (error) throw error;
-
-      setSubmitStatus('success');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        company: '',
-        inquiry_type: 'general',
-        property_address: '',
-        number_of_units: '',
-        board_position: '',
-        years_at_property: '',
-        previous_experience: '',
-        message: ''
-      });
-
-      setTimeout(() => setSubmitStatus('idle'), 5000);
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      setSubmitStatus('error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    const form = e.target as HTMLFormElement;
+    form.submit();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -111,7 +67,20 @@ export function ContactForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        name="contact"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
+        <input type="hidden" name="form-name" value="contact" />
+        <p className="hidden">
+          <label>
+            Don't fill this out if you're human: <input name="bot-field" />
+          </label>
+        </p>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="flex items-center text-sm font-semibold text-gray-700 mb-2">

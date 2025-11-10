@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { AlertTriangle, User, MapPin, Phone, Calendar, FileText, Send, Shield, Scale, Clock } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface ViolationFormData {
   reporter_name: string;
@@ -40,59 +39,10 @@ export function ViolationReportForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus('idle');
-
-    try {
-      const { error } = await supabase
-        .from('violation_reports')
-        .insert({
-          reporter_name: formData.reporter_name,
-          reporter_unit_address: formData.reporter_unit_address,
-          reporter_contact: formData.reporter_contact,
-          report_date: formData.report_date,
-          violator_name: formData.violator_name || null,
-          violator_unit: formData.violator_unit || null,
-          violation_types: formData.violation_types,
-          violation_details: formData.violation_details,
-          reported_before: formData.reported_before === 'yes',
-          requested_action: formData.requested_action,
-          signature: formData.signature,
-          acknowledged_sharing: formData.acknowledged_sharing,
-          certified_accurate: formData.certified_accurate,
-          acknowledged_contact: formData.acknowledged_contact,
-          status: 'new'
-        });
-
-      if (error) throw error;
-
-      setSubmitStatus('success');
-      setFormData({
-        reporter_name: '',
-        reporter_unit_address: '',
-        reporter_contact: '',
-        report_date: new Date().toISOString().split('T')[0],
-        violator_name: '',
-        violator_unit: '',
-        violation_types: [],
-        violation_details: '',
-        reported_before: 'no',
-        requested_action: 'warning',
-        signature: '',
-        acknowledged_sharing: false,
-        certified_accurate: false,
-        acknowledged_contact: false
-      });
-
-      setTimeout(() => setSubmitStatus('idle'), 5000);
-    } catch (error) {
-      console.error('Error submitting violation report:', error);
-      setSubmitStatus('error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    const form = e.target as HTMLFormElement;
+    form.submit();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -145,7 +95,20 @@ export function ViolationReportForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form
+        name="violation-report"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        onSubmit={handleSubmit}
+        className="space-y-8"
+      >
+        <input type="hidden" name="form-name" value="violation-report" />
+        <p className="hidden">
+          <label>
+            Don't fill this out if you're human: <input name="bot-field" />
+          </label>
+        </p>
         {/* Reporter Information */}
         <div className="border-b border-gray-200 pb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">Reporter Information</h3>
