@@ -39,10 +39,49 @@ export function ViolationReportForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
     const form = e.target as HTMLFormElement;
-    form.submit();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData as any).toString(),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({
+          reporter_name: '',
+          reporter_unit_address: '',
+          reporter_contact: '',
+          report_date: new Date().toISOString().split('T')[0],
+          violator_name: '',
+          violator_unit: '',
+          violation_types: [],
+          violation_details: '',
+          reported_before: 'no',
+          requested_action: 'warning',
+          signature: '',
+          acknowledged_sharing: false,
+          certified_accurate: false,
+          acknowledged_contact: false
+        });
+        setTimeout(() => setSubmitStatus('idle'), 5000);
+      } else {
+        throw new Error('Form submission failed');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
