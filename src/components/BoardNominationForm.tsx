@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Users, User, Mail, Phone, MapPin, FileText, Send, Award, CheckCircle, Printer } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface BoardNominationFormData {
   nominee_name: string;
@@ -55,6 +54,12 @@ export function BoardNominationForm() {
     setSubmitStatus('idle');
 
     try {
+      const endpoint = import.meta.env.VITE_FORMSPREE_BOARD_NOMINATION_ENDPOINT;
+
+      if (!endpoint) {
+        throw new Error('Formspree endpoint not configured');
+      }
+
       const submissionData = {
         nominee_name: formData.nominee_name,
         nominee_email: formData.nominee_email,
@@ -67,42 +72,49 @@ export function BoardNominationForm() {
         relevant_skills: formData.relevant_skills,
         motivation: formData.motivation,
         time_commitment: formData.time_commitment,
-        nominee_references: formData.references,
+        references: formData.references,
         signature: formData.signature,
-        acknowledged_terms: formData.acknowledged_terms,
-        acknowledged_commitment: formData.acknowledged_commitment,
-        acknowledged_attendance: formData.acknowledged_attendance
+        acknowledged_terms: formData.acknowledged_terms ? 'Yes' : 'No',
+        acknowledged_commitment: formData.acknowledged_commitment ? 'Yes' : 'No',
+        acknowledged_attendance: formData.acknowledged_attendance ? 'Yes' : 'No',
+        _subject: `Board Nomination Application - ${formData.nominee_name}`
       };
 
-      const { error } = await supabase
-        .from('board_nominations')
-        .insert([submissionData]);
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      setSubmitStatus('success');
-      setSubmittedData({ ...formData });
-      setFormData({
-        nominee_name: '',
-        nominee_email: '',
-        nominee_phone: '',
-        nominee_unit_address: '',
-        years_at_property: '',
-        ownership_type: 'owner',
-        current_employment: '',
-        previous_board_experience: '',
-        relevant_skills: '',
-        motivation: '',
-        time_commitment: 'yes',
-        references: '',
-        signature: '',
-        acknowledged_terms: false,
-        acknowledged_commitment: false,
-        acknowledged_attendance: false
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(submissionData),
       });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setSubmittedData({ ...formData });
+        setFormData({
+          nominee_name: '',
+          nominee_email: '',
+          nominee_phone: '',
+          nominee_unit_address: '',
+          years_at_property: '',
+          ownership_type: 'owner',
+          current_employment: '',
+          previous_board_experience: '',
+          relevant_skills: '',
+          motivation: '',
+          time_commitment: 'yes',
+          references: '',
+          signature: '',
+          acknowledged_terms: false,
+          acknowledged_commitment: false,
+          acknowledged_attendance: false
+        });
+      } else {
+        const errorData = await response.text();
+        console.error('Form submission failed:', response.status, errorData);
+        throw new Error(`Form submission failed: ${response.status}`);
+      }
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus('error');
