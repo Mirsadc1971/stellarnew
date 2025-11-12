@@ -51,7 +51,7 @@ export function ViolationReportForm() {
         _subject: `Violation Report: ${formData.violation_types.join(', ')} - ${formData.reporter_name}`
       };
 
-      const response = await fetch(import.meta.env.VITE_FORMSPREE_ENDPOINT, {
+      const response = await fetch(import.meta.env.VITE_FORMSPREE_VIOLATION_REPORT_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
