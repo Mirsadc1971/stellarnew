@@ -38,14 +38,17 @@ export function ContactForm() {
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-
     try {
-      const response = await fetch('/', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData as any).toString(),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          formType: 'contact',
+          data: formData
+        }),
       });
 
       if (response.ok) {
@@ -104,19 +107,9 @@ export function ContactForm() {
       )}
 
       <form
-        name="contact"
-        method="POST"
-        data-netlify="true"
-        netlify-honeypot="bot-field"
         onSubmit={handleSubmit}
         className="space-y-6"
       >
-        <input type="hidden" name="form-name" value="contact" />
-        <p className="hidden">
-          <label>
-            Don't fill this out if you're human: <input name="bot-field" />
-          </label>
-        </p>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="flex items-center text-sm font-semibold text-gray-700 mb-2">

@@ -44,14 +44,20 @@ export function ViolationReportForm() {
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-
     try {
-      const response = await fetch('/', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData as any).toString(),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          formType: 'violation',
+          data: {
+            ...formData,
+            violation_types: formData.violation_types.join(', ')
+          }
+        }),
       });
 
       if (response.ok) {
@@ -135,19 +141,9 @@ export function ViolationReportForm() {
       )}
 
       <form
-        name="violation-report"
-        method="POST"
-        data-netlify="true"
-        netlify-honeypot="bot-field"
         onSubmit={handleSubmit}
         className="space-y-8"
       >
-        <input type="hidden" name="form-name" value="violation-report" />
-        <p className="hidden">
-          <label>
-            Don't fill this out if you're human: <input name="bot-field" />
-          </label>
-        </p>
         {/* Reporter Information */}
         <div className="border-b border-gray-200 pb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">Reporter Information</h3>
