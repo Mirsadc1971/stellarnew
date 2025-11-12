@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Users, User, Mail, Phone, MapPin, FileText, Send, Award, CheckCircle, Printer } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface BoardNominationFormData {
   nominee_name: string;
@@ -54,41 +55,51 @@ export function BoardNominationForm() {
     setSubmitStatus('idle');
 
     try {
-      const response = await fetch(import.meta.env.VITE_FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          _subject: `Board Nomination Application - ${formData.nominee_name}`
-        }),
-      });
-
-      if (response.ok) {
-        setSubmitStatus('success');
-        setSubmittedData({ ...formData });
-        setFormData({
-          nominee_name: '',
-          nominee_email: '',
-          nominee_phone: '',
-          nominee_unit_address: '',
-          years_at_property: '',
-          ownership_type: 'owner',
-          current_employment: '',
-          previous_board_experience: '',
-          relevant_skills: '',
-          motivation: '',
-          time_commitment: 'yes',
-          references: '',
-          signature: '',
-          acknowledged_terms: false,
-          acknowledged_commitment: false,
-          acknowledged_attendance: false
+      const { error } = await supabase
+        .from('board_nominations')
+        .insert({
+          nominee_name: formData.nominee_name,
+          nominee_email: formData.nominee_email,
+          nominee_phone: formData.nominee_phone,
+          nominee_unit_address: formData.nominee_unit_address,
+          years_at_property: formData.years_at_property,
+          ownership_type: formData.ownership_type,
+          current_employment: formData.current_employment,
+          previous_board_experience: formData.previous_board_experience,
+          relevant_skills: formData.relevant_skills,
+          motivation: formData.motivation,
+          time_commitment: formData.time_commitment,
+          nominee_references: formData.references,
+          signature: formData.signature,
+          acknowledged_terms: formData.acknowledged_terms,
+          acknowledged_commitment: formData.acknowledged_commitment,
+          acknowledged_attendance: formData.acknowledged_attendance
         });
-      } else {
-        throw new Error('Form submission failed');
+
+      if (error) {
+        throw error;
       }
+
+      setSubmitStatus('success');
+      setSubmittedData({ ...formData });
+      setFormData({
+        nominee_name: '',
+        nominee_email: '',
+        nominee_phone: '',
+        nominee_unit_address: '',
+        years_at_property: '',
+        ownership_type: 'owner',
+        current_employment: '',
+        previous_board_experience: '',
+        relevant_skills: '',
+        motivation: '',
+        time_commitment: 'yes',
+        references: '',
+        signature: '',
+        acknowledged_terms: false,
+        acknowledged_commitment: false,
+        acknowledged_attendance: false
+      });
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus('error');
