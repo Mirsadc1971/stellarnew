@@ -54,6 +54,13 @@ export function BoardNominationForm() {
     setSubmitStatus('idle');
 
     try {
+      const endpoint = import.meta.env.VITE_FORMSPREE_BOARD_NOMINATION_ENDPOINT;
+      console.log('Submitting to:', endpoint);
+
+      if (!endpoint) {
+        throw new Error('Formspree endpoint not configured');
+      }
+
       const submissionData = {
         nominee_name: formData.nominee_name,
         nominee_email: formData.nominee_email,
@@ -74,13 +81,18 @@ export function BoardNominationForm() {
         _subject: `Board Nomination Application - ${formData.nominee_name}`
       };
 
-      const response = await fetch(import.meta.env.VITE_FORMSPREE_BOARD_NOMINATION_ENDPOINT, {
+      console.log('Submission data:', submissionData);
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(submissionData),
       });
+
+      console.log('Response status:', response.status);
 
       if (response.ok) {
         setSubmitStatus('success');
@@ -106,7 +118,7 @@ export function BoardNominationForm() {
       } else {
         const errorData = await response.text();
         console.error('Form submission failed:', response.status, errorData);
-        throw new Error('Form submission failed');
+        throw new Error(`Form submission failed: ${response.status}`);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
