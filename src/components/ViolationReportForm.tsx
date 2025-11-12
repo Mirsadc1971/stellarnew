@@ -45,7 +45,7 @@ export function ViolationReportForm() {
     setSubmitStatus('idle');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
