@@ -345,8 +345,8 @@ function App() {
             <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl text-center">
               <Mail className="w-12 h-12 mx-auto mb-4" />
               <h3 className="text-xl font-bold mb-3">Email Us</h3>
-              <a href="mailto:mirsad@stellarpropertygroup.com" className="text-blue-100 hover:text-white transition-colors break-all">
-                mirsad@stellarpropertygroup.com
+              <a href="mailto:service@stellarpropertygroup.com" className="text-blue-100 hover:text-white transition-colors break-all">
+                service@stellarpropertygroup.com
               </a>
             </div>
           </div>
@@ -393,7 +393,7 @@ function App() {
                 <li>5107 N Western Ave, Suite 1S</li>
                 <li>Chicago, IL 60625</li>
                 <li><a href="tel:7737280652" className="hover:text-white transition-colors">773.728.0652</a></li>
-                <li><a href="mailto:mirsad@stellarpropertygroup.com" className="hover:text-white transition-colors break-all">mirsad@stellarpropertygroup.com</a></li>
+                <li><a href="mailto:service@stellarpropertygroup.com" className="hover:text-white transition-colors break-all">service@stellarpropertygroup.com</a></li>
               </ul>
             </div>
           </div>

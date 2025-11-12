@@ -276,7 +276,7 @@ export function BoardNominationForm() {
       {submitStatus === 'error' && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
           <p className="font-semibold">Oops! Something went wrong.</p>
-          <p className="text-sm">Please try again or contact us directly at mirsad@stellarpropertygroup.com</p>
+          <p className="text-sm">Please try again or contact us directly at service@stellarpropertygroup.com</p>
           <p className="text-xs mt-2 text-gray-600">Check the browser console (F12) for more details.</p>
         </div>
       )}
