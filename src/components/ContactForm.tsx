@@ -52,6 +52,18 @@ export function ContactForm() {
       });
 
       if (response.ok) {
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            formType: 'contact',
+            data: formData
+          }),
+        });
+
         setSubmitStatus('success');
         setFormData({
           name: '',

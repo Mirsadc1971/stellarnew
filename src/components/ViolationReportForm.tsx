@@ -45,6 +45,11 @@ export function ViolationReportForm() {
     setSubmitStatus('idle');
 
     try {
+      const submissionData = {
+        ...formData,
+        violation_types: formData.violation_types.join(', ')
+      };
+
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-form`, {
         method: 'POST',
         headers: {
@@ -53,14 +58,23 @@ export function ViolationReportForm() {
         },
         body: JSON.stringify({
           formType: 'violation',
-          data: {
-            ...formData,
-            violation_types: formData.violation_types.join(', ')
-          }
+          data: submissionData
         }),
       });
 
       if (response.ok) {
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            formType: 'violation',
+            data: submissionData
+          }),
+        });
+
         setSubmitStatus('success');
         setFormData({
           reporter_name: '',

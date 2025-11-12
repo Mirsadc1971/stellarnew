@@ -22,12 +22,12 @@ Deno.serve(async (req: Request) => {
   try {
     const { formType, data }: EmailPayload = await req.json();
 
-    let emailBody = '';
     let subject = '';
+    let body = '';
 
     if (formType === 'contact') {
       subject = `New Contact Form Submission from ${data.name}`;
-      emailBody = `
+      body = `
 New Contact Form Submission
 
 Name: ${data.name}
@@ -47,10 +47,10 @@ Previous Management Experience: ${data.previous_experience || 'N/A'}
 
 Message:
 ${data.message}
-      `;
+`;
     } else if (formType === 'violation') {
-      subject = `New Violation Report - ${data.violator_name}`;
-      emailBody = `
+      subject = `New Violation Report - ${data.violator_name || 'Unknown'}`;
+      body = `
 New Violation Report Submitted
 
 REPORTER INFORMATION:
@@ -60,8 +60,8 @@ Contact: ${data.reporter_contact}
 Report Date: ${data.report_date}
 
 VIOLATOR INFORMATION:
-Name: ${data.violator_name}
-Unit: ${data.violator_unit}
+Name: ${data.violator_name || 'N/A'}
+Unit: ${data.violator_unit || 'N/A'}
 
 VIOLATION DETAILS:
 Types: ${data.violation_types}
@@ -71,27 +71,73 @@ Previously Reported: ${data.reported_before}
 Requested Action: ${data.requested_action}
 
 Signature: ${data.signature}
-      `;
+`;
     }
 
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
-      },
-      body: JSON.stringify({
-        from: 'forms@stellarpropertygroup.com',
-        to: 'mirsad@stellarpropertygroup.com',
-        subject: subject,
-        text: emailBody,
-      }),
+    const smtpUser = Deno.env.get('SMTP_USER');
+    const smtpPass = Deno.env.get('SMTP_PASS');
+    const recipientEmail = Deno.env.get('RECIPIENT_EMAIL') || smtpUser;
+
+    if (!smtpUser || !smtpPass) {
+      throw new Error('SMTP credentials not configured');
+    }
+
+    const emailContent = [
+      `From: ${smtpUser}`,
+      `To: ${recipientEmail}`,
+      `Subject: ${subject}`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/plain; charset=utf-8',
+      '',
+      body
+    ].join('\r\n');
+
+    const base64Credentials = btoa(`${smtpUser}:${smtpPass}`);
+    const base64Email = btoa(emailContent);
+
+    const conn = await Deno.connect({
+      hostname: 'smtp-mail.outlook.com',
+      port: 587,
     });
 
-    if (!emailResponse.ok) {
-      const error = await emailResponse.text();
-      throw new Error(`Failed to send email: ${error}`);
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    async function readResponse() {
+      const buffer = new Uint8Array(1024);
+      const n = await conn.read(buffer);
+      return decoder.decode(buffer.subarray(0, n || 0));
     }
+
+    async function sendCommand(command: string) {
+      await conn.write(encoder.encode(command + '\r\n'));
+      return await readResponse();
+    }
+
+    await readResponse();
+    await sendCommand('EHLO localhost');
+    await sendCommand('STARTTLS');
+
+    const tlsConn = await Deno.startTls(conn, { hostname: 'smtp-mail.outlook.com' });
+
+    async function sendTlsCommand(command: string) {
+      await tlsConn.write(encoder.encode(command + '\r\n'));
+      const buffer = new Uint8Array(1024);
+      const n = await tlsConn.read(buffer);
+      return decoder.decode(buffer.subarray(0, n || 0));
+    }
+
+    await sendTlsCommand('EHLO localhost');
+    await sendTlsCommand('AUTH LOGIN');
+    await sendTlsCommand(btoa(smtpUser));
+    await sendTlsCommand(btoa(smtpPass));
+    await sendTlsCommand(`MAIL FROM:<${smtpUser}>`);
+    await sendTlsCommand(`RCPT TO:<${recipientEmail}>`);
+    await sendTlsCommand('DATA');
+    await sendTlsCommand(emailContent + '\r\n.');
+    await sendTlsCommand('QUIT');
+
+    tlsConn.close();
 
     return new Response(
       JSON.stringify({ success: true, message: 'Email sent successfully' }),
