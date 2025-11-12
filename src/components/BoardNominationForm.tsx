@@ -54,15 +54,32 @@ export function BoardNominationForm() {
     setSubmitStatus('idle');
 
     try {
+      const submissionData = {
+        nominee_name: formData.nominee_name,
+        nominee_email: formData.nominee_email,
+        nominee_phone: formData.nominee_phone,
+        nominee_unit_address: formData.nominee_unit_address,
+        years_at_property: formData.years_at_property,
+        ownership_type: formData.ownership_type,
+        current_employment: formData.current_employment,
+        previous_board_experience: formData.previous_board_experience,
+        relevant_skills: formData.relevant_skills,
+        motivation: formData.motivation,
+        time_commitment: formData.time_commitment,
+        references: formData.references,
+        signature: formData.signature,
+        acknowledged_terms: formData.acknowledged_terms ? 'Yes' : 'No',
+        acknowledged_commitment: formData.acknowledged_commitment ? 'Yes' : 'No',
+        acknowledged_attendance: formData.acknowledged_attendance ? 'Yes' : 'No',
+        _subject: `Board Nomination Application - ${formData.nominee_name}`
+      };
+
       const response = await fetch(import.meta.env.VITE_FORMSPREE_BOARD_NOMINATION_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          _subject: `Board Nomination Application - ${formData.nominee_name}`
-        }),
+        body: JSON.stringify(submissionData),
       });
 
       if (response.ok) {
@@ -87,6 +104,8 @@ export function BoardNominationForm() {
           acknowledged_attendance: false
         });
       } else {
+        const errorData = await response.text();
+        console.error('Form submission failed:', response.status, errorData);
         throw new Error('Form submission failed');
       }
     } catch (error) {
