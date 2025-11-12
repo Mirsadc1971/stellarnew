@@ -9,9 +9,6 @@ interface FormData {
   inquiry_type: string;
   property_address: string;
   number_of_units: string;
-  board_position: string;
-  years_at_property: string;
-  previous_experience: string;
   message: string;
 }
 
@@ -24,9 +21,6 @@ export function ContactForm() {
     inquiry_type: 'general',
     property_address: '',
     number_of_units: '',
-    board_position: '',
-    years_at_property: '',
-    previous_experience: '',
     message: ''
   });
 
@@ -60,9 +54,6 @@ export function ContactForm() {
           inquiry_type: 'general',
           property_address: '',
           number_of_units: '',
-          board_position: '',
-          years_at_property: '',
-          previous_experience: '',
           message: ''
         });
         setTimeout(() => setSubmitStatus('idle'), 5000);
@@ -194,7 +185,6 @@ export function ContactForm() {
             <option value="property_management">Property Management Services</option>
             <option value="quote">Request a Quote</option>
             <option value="maintenance">Maintenance Request</option>
-            <option value="board_nomination">Board Nomination Application</option>
           </select>
         </div>
 
@@ -233,91 +223,6 @@ export function ContactForm() {
           </div>
         )}
 
-        {formData.inquiry_type === 'board_nomination' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Board Nomination Information</h3>
-              <p className="text-sm text-gray-600">Please provide details about your interest in serving on the board.</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="property_address" className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                  Property/Association Address *
-                </label>
-                <input
-                  type="text"
-                  id="property_address"
-                  name="property_address"
-                  required={formData.inquiry_type === 'board_nomination'}
-                  value={formData.property_address}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="123 Main St, Chicago, IL"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="board_position" className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                  Position Interested In *
-                </label>
-                <select
-                  id="board_position"
-                  name="board_position"
-                  required={formData.inquiry_type === 'board_nomination'}
-                  value={formData.board_position}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                >
-                  <option value="">Select a position</option>
-                  <option value="president">President</option>
-                  <option value="vice_president">Vice President</option>
-                  <option value="treasurer">Treasurer</option>
-                  <option value="secretary">Secretary</option>
-                  <option value="board_member">Board Member at Large</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="years_at_property" className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                  Years at Property *
-                </label>
-                <input
-                  type="number"
-                  id="years_at_property"
-                  name="years_at_property"
-                  required={formData.inquiry_type === 'board_nomination'}
-                  value={formData.years_at_property}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="5"
-                  min="0"
-                  step="0.5"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="previous_experience" className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                  Previous Board Experience
-                </label>
-                <select
-                  id="previous_experience"
-                  name="previous_experience"
-                  value={formData.previous_experience}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                >
-                  <option value="">Select experience level</option>
-                  <option value="none">No Previous Experience</option>
-                  <option value="some">Some Experience</option>
-                  <option value="extensive">Extensive Experience</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div>
           <label htmlFor="message" className="flex items-center text-sm font-semibold text-gray-700 mb-2">

@@ -1,10 +1,11 @@
-import { Building2, Phone, Mail, MapPin, CheckCircle, Users, Home, Shield, TrendingUp, Clock, Award, Star, FileText, AlertTriangle } from 'lucide-react';
+import { Building2, Phone, Mail, MapPin, CheckCircle, Users, Home, Shield, TrendingUp, Clock, Award, Star, FileText, AlertTriangle, UserPlus } from 'lucide-react';
 import { ContactForm } from './components/ContactForm';
 import { ViolationReportForm } from './components/ViolationReportForm';
+import { BoardNominationForm } from './components/BoardNominationForm';
 import { useState } from 'react';
 
 function App() {
-  const [activeForm, setActiveForm] = useState<'contact' | 'violation'>('contact');
+  const [activeForm, setActiveForm] = useState<'contact' | 'violation' | 'nomination'>('contact');
 
   return (
     <div className="min-h-screen bg-white">
@@ -249,7 +250,7 @@ function App() {
           </div>
 
           <div className="max-w-4xl mx-auto mb-8">
-            <div className="flex justify-center space-x-4">
+            <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => setActiveForm('contact')}
                 className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
@@ -272,11 +273,24 @@ function App() {
                 <AlertTriangle className="w-5 h-5" />
                 <span>Violation Report</span>
               </button>
+              <button
+                onClick={() => setActiveForm('nomination')}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                  activeForm === 'nomination'
+                    ? 'bg-green-600 text-white shadow-lg'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                }`}
+              >
+                <UserPlus className="w-5 h-5" />
+                <span>Board Nomination</span>
+              </button>
             </div>
           </div>
 
           <div className="max-w-4xl mx-auto">
-            {activeForm === 'contact' ? <ContactForm /> : <ViolationReportForm />}
+            {activeForm === 'contact' && <ContactForm />}
+            {activeForm === 'violation' && <ViolationReportForm />}
+            {activeForm === 'nomination' && <BoardNominationForm />}
           </div>
 
           <div className="mt-12 grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
