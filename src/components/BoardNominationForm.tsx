@@ -282,6 +282,14 @@ export function BoardNominationForm() {
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
           <p className="font-semibold">Oops! Something went wrong.</p>
           <p className="text-sm">Please try again or contact us directly at mirsad@stellarpropertygroup.com</p>
+          <p className="text-xs mt-2 text-gray-600">Check the browser console (F12) for more details.</p>
+        </div>
+      )}
+
+      {!import.meta.env.VITE_FORMSPREE_BOARD_NOMINATION_ENDPOINT && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+          <p className="font-semibold">Configuration Error</p>
+          <p className="text-sm">Formspree endpoint not configured. Please restart the dev server.</p>
         </div>
       )}
 
