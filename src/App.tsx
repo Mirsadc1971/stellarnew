@@ -1,4 +1,4 @@
-import { Building2, Phone, Mail, MapPin, CheckCircle, Users, Home, Shield, TrendingUp, Clock, Award, Star, FileText, AlertTriangle, UserPlus } from 'lucide-react';
+import { Building2, Phone, Mail, MapPin, CheckCircle, Users, Home, Shield, TrendingUp, Clock, Award, Star, FileText, AlertTriangle, UserPlus, Menu, X } from 'lucide-react';
 import { ContactForm } from './components/ContactForm';
 import { ViolationReportForm } from './components/ViolationReportForm';
 import { BoardNominationForm } from './components/BoardNominationForm';
@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 function App() {
   const [activeForm, setActiveForm] = useState<'contact' | 'violation' | 'nomination'>('contact');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-white">
@@ -16,10 +17,12 @@ function App() {
             <div className="flex items-center space-x-3">
               <Building2 className="w-8 h-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Stellar Property Group</h1>
-                <p className="text-sm text-gray-600">Chicago Property Management</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Stellar Property Group</h1>
+                <p className="text-xs sm:text-sm text-gray-600">Chicago Property Management</p>
               </div>
             </div>
+
+            {/* Desktop Menu */}
             <div className="hidden md:flex space-x-8 items-center">
               <a href="#services" className="text-gray-700 hover:text-blue-600 transition-colors">Services</a>
               <a href="#about" className="text-gray-700 hover:text-blue-600 transition-colors">About</a>
@@ -28,7 +31,67 @@ function App() {
               <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
               <a href="https://stellarpropertygrp.appfolio.com/oportal/users/log_in" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Make a Payment</a>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
+
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden mt-4 pb-4 border-t border-gray-200 pt-4">
+              <div className="flex flex-col space-y-4">
+                <a
+                  href="#services"
+                  className="text-gray-700 hover:text-blue-600 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Services
+                </a>
+                <a
+                  href="#about"
+                  className="text-gray-700 hover:text-blue-600 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About
+                </a>
+                <a
+                  href="#why-us"
+                  className="text-gray-700 hover:text-blue-600 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Why Choose Us
+                </a>
+                <a
+                  href="#forms"
+                  className="text-gray-700 hover:text-blue-600 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Forms
+                </a>
+                <a
+                  href="#contact"
+                  className="text-gray-700 hover:text-blue-600 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Contact
+                </a>
+                <a
+                  href="https://stellarpropertygrp.appfolio.com/oportal/users/log_in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
+                >
+                  Make a Payment
+                </a>
+              </div>
+            </div>
+          )}
         </nav>
       </header>
 
