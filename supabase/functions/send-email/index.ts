@@ -22,122 +22,60 @@ Deno.serve(async (req: Request) => {
   try {
     const { formType, data }: EmailPayload = await req.json();
 
-    let subject = '';
-    let body = '';
+    const formspreeUrl = Deno.env.get('FORMSPREE_ENDPOINT');
+
+    if (!formspreeUrl) {
+      throw new Error('FORMSPREE_ENDPOINT not configured');
+    }
+
+    let emailData: Record<string, any> = {};
 
     if (formType === 'contact') {
-      subject = `New Contact Form Submission from ${data.name}`;
-      body = `
-New Contact Form Submission
+      emailData = {
+        subject: `New Contact Form Submission from ${data.name}`,
+        name: data.name,
+        email: data.email,
+        phone: data.phone || 'N/A',
+        company: data.company || 'N/A',
+        inquiry_type: data.inquiry_type,
+        message: data.message,
+      };
 
-Name: ${data.name}
-Email: ${data.email}
-Phone: ${data.phone || 'N/A'}
-Company: ${data.company || 'N/A'}
-Inquiry Type: ${data.inquiry_type}
-
-${data.inquiry_type === 'board_member' ? `
-Board Member Information:
-Property Address: ${data.property_address || 'N/A'}
-Number of Units: ${data.number_of_units || 'N/A'}
-Board Position: ${data.board_position || 'N/A'}
-Years at Property: ${data.years_at_property || 'N/A'}
-Previous Management Experience: ${data.previous_experience || 'N/A'}
-` : ''}
-
-Message:
-${data.message}
-`;
+      if (data.inquiry_type === 'board_nomination') {
+        emailData.property_address = data.property_address || 'N/A';
+        emailData.number_of_units = data.number_of_units || 'N/A';
+        emailData.board_position = data.board_position || 'N/A';
+        emailData.years_at_property = data.years_at_property || 'N/A';
+        emailData.previous_experience = data.previous_experience || 'N/A';
+      }
     } else if (formType === 'violation') {
-      subject = `New Violation Report - ${data.violator_name || 'Unknown'}`;
-      body = `
-New Violation Report Submitted
-
-REPORTER INFORMATION:
-Name: ${data.reporter_name}
-Unit/Address: ${data.reporter_unit_address}
-Contact: ${data.reporter_contact}
-Report Date: ${data.report_date}
-
-VIOLATOR INFORMATION:
-Name: ${data.violator_name || 'N/A'}
-Unit: ${data.violator_unit || 'N/A'}
-
-VIOLATION DETAILS:
-Types: ${data.violation_types}
-Details: ${data.violation_details}
-
-Previously Reported: ${data.reported_before}
-Requested Action: ${data.requested_action}
-
-Signature: ${data.signature}
-`;
+      emailData = {
+        subject: `New Violation Report - ${data.violator_name || 'Unknown'}`,
+        reporter_name: data.reporter_name,
+        reporter_unit_address: data.reporter_unit_address,
+        reporter_contact: data.reporter_contact,
+        report_date: data.report_date,
+        violator_name: data.violator_name || 'N/A',
+        violator_unit: data.violator_unit || 'N/A',
+        violation_types: data.violation_types,
+        violation_details: data.violation_details,
+        reported_before: data.reported_before,
+        requested_action: data.requested_action,
+        signature: data.signature,
+      };
     }
 
-    const smtpUser = Deno.env.get('SMTP_USER');
-    const smtpPass = Deno.env.get('SMTP_PASS');
-    const recipientEmail = Deno.env.get('RECIPIENT_EMAIL') || smtpUser;
-
-    if (!smtpUser || !smtpPass) {
-      throw new Error('SMTP credentials not configured');
-    }
-
-    const emailContent = [
-      `From: ${smtpUser}`,
-      `To: ${recipientEmail}`,
-      `Subject: ${subject}`,
-      'MIME-Version: 1.0',
-      'Content-Type: text/plain; charset=utf-8',
-      '',
-      body
-    ].join('\r\n');
-
-    const base64Credentials = btoa(`${smtpUser}:${smtpPass}`);
-    const base64Email = btoa(emailContent);
-
-    const conn = await Deno.connect({
-      hostname: 'smtp-mail.outlook.com',
-      port: 587,
+    const response = await fetch(formspreeUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailData),
     });
 
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-
-    async function readResponse() {
-      const buffer = new Uint8Array(1024);
-      const n = await conn.read(buffer);
-      return decoder.decode(buffer.subarray(0, n || 0));
+    if (!response.ok) {
+      throw new Error(`Formspree request failed: ${response.statusText}`);
     }
-
-    async function sendCommand(command: string) {
-      await conn.write(encoder.encode(command + '\r\n'));
-      return await readResponse();
-    }
-
-    await readResponse();
-    await sendCommand('EHLO localhost');
-    await sendCommand('STARTTLS');
-
-    const tlsConn = await Deno.startTls(conn, { hostname: 'smtp-mail.outlook.com' });
-
-    async function sendTlsCommand(command: string) {
-      await tlsConn.write(encoder.encode(command + '\r\n'));
-      const buffer = new Uint8Array(1024);
-      const n = await tlsConn.read(buffer);
-      return decoder.decode(buffer.subarray(0, n || 0));
-    }
-
-    await sendTlsCommand('EHLO localhost');
-    await sendTlsCommand('AUTH LOGIN');
-    await sendTlsCommand(btoa(smtpUser));
-    await sendTlsCommand(btoa(smtpPass));
-    await sendTlsCommand(`MAIL FROM:<${smtpUser}>`);
-    await sendTlsCommand(`RCPT TO:<${recipientEmail}>`);
-    await sendTlsCommand('DATA');
-    await sendTlsCommand(emailContent + '\r\n.');
-    await sendTlsCommand('QUIT');
-
-    tlsConn.close();
 
     return new Response(
       JSON.stringify({ success: true, message: 'Email sent successfully' }),
