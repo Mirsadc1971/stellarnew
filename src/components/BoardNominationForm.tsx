@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, User, Mail, Phone, MapPin, FileText, Send, Award, CheckCircle } from 'lucide-react';
+import { Users, User, Mail, Phone, MapPin, FileText, Send, Award, CheckCircle, Printer } from 'lucide-react';
 
 interface BoardNominationFormData {
   nominee_name: string;
@@ -42,6 +42,11 @@ export function BoardNominationForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submittedData, setSubmittedData] = useState<BoardNominationFormData | null>(null);
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +67,7 @@ export function BoardNominationForm() {
 
       if (response.ok) {
         setSubmitStatus('success');
+        setSubmittedData({ ...formData });
         setFormData({
           nominee_name: '',
           nominee_email: '',
@@ -80,7 +86,6 @@ export function BoardNominationForm() {
           acknowledged_commitment: false,
           acknowledged_attendance: false
         });
-        setTimeout(() => setSubmitStatus('idle'), 5000);
       } else {
         throw new Error('Form submission failed');
       }
@@ -118,10 +123,127 @@ export function BoardNominationForm() {
         </div>
       </div>
 
-      {submitStatus === 'success' && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-          <p className="font-semibold">Your board nomination application has been submitted successfully!</p>
-          <p className="text-sm">The nominating committee will review your application and contact you regarding next steps.</p>
+      {submitStatus === 'success' && submittedData && (
+        <div className="mb-6 space-y-4">
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
+            <p className="font-semibold">Your board nomination application has been submitted successfully!</p>
+            <p className="text-sm">The nominating committee will review your application and contact you regarding next steps.</p>
+          </div>
+
+          <div className="flex justify-center">
+            <button
+              onClick={handlePrint}
+              className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors print:hidden"
+            >
+              <Printer className="w-5 h-5" />
+              <span>Print Application Copy</span>
+            </button>
+          </div>
+
+          {/* Printable version */}
+          <div className="hidden print:block bg-white p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Board Member Nomination Application</h1>
+              <p className="text-gray-600">Stellar Property Group</p>
+              <p className="text-sm text-gray-500">Submitted on {new Date().toLocaleDateString()}</p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="border-b border-gray-300 pb-4">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Nominee Information</h2>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="font-semibold text-gray-700">Full Name:</p>
+                    <p className="text-gray-900">{submittedData.nominee_name}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">Email:</p>
+                    <p className="text-gray-900">{submittedData.nominee_email}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">Phone:</p>
+                    <p className="text-gray-900">{submittedData.nominee_phone}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">Unit Address:</p>
+                    <p className="text-gray-900">{submittedData.nominee_unit_address}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">Years at Property:</p>
+                    <p className="text-gray-900">{submittedData.years_at_property}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">Ownership Status:</p>
+                    <p className="text-gray-900">{submittedData.ownership_type}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-b border-gray-300 pb-4">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Professional Background</h2>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="font-semibold text-gray-700">Current Employment/Profession:</p>
+                    <p className="text-gray-900">{submittedData.current_employment || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">Previous Board or Leadership Experience:</p>
+                    <p className="text-gray-900 whitespace-pre-wrap">{submittedData.previous_board_experience || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">Relevant Skills & Expertise:</p>
+                    <p className="text-gray-900 whitespace-pre-wrap">{submittedData.relevant_skills}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-b border-gray-300 pb-4">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Motivation & Commitment</h2>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="font-semibold text-gray-700">Why do you want to serve on the board?</p>
+                    <p className="text-gray-900 whitespace-pre-wrap">{submittedData.motivation}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">Can you commit to attending monthly board meetings?</p>
+                    <p className="text-gray-900">{submittedData.time_commitment}</p>
+                  </div>
+                  {submittedData.references && (
+                    <div>
+                      <p className="font-semibold text-gray-700">References:</p>
+                      <p className="text-gray-900 whitespace-pre-wrap">{submittedData.references}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-b border-gray-300 pb-4">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Signature</h2>
+                <div className="text-sm">
+                  <p className="font-semibold text-gray-700">Applicant Signature:</p>
+                  <p className="text-gray-900 text-2xl font-cursive mt-2">{submittedData.signature}</p>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Acknowledgements</h2>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start space-x-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    <p className="text-gray-700">I understand that board members have fiduciary duties to the association and must act in the best interests of all owners.</p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    <p className="text-gray-700">I understand that serving on the board requires a significant time commitment.</p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    <p className="text-gray-700">I certify that the information provided is true and accurate.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
