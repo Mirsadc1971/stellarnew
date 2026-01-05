@@ -29,7 +29,7 @@ function App() {
               <a href="#why-us" className="text-gray-700 hover:text-blue-600 transition-colors">Why Choose Us</a>
               <a href="#forms" className="text-gray-700 hover:text-blue-600 transition-colors">Forms</a>
               <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
-              <a href="https://stellarpropertygrp.appfolio.com/oportal/users/log_in" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Make a Payment</a>
+              <a href="https://stellarpropertygrp.appfolio.com/connect/" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Make a Payment</a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -82,7 +82,7 @@ function App() {
                   Contact
                 </a>
                 <a
-                  href="https://stellarpropertygrp.appfolio.com/oportal/users/log_in"
+                  href="https://stellarpropertygrp.appfolio.com/connect/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
